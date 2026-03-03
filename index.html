@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Martingale Lab</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    margin-top: 20px;
+    font-size: 32px;
+}
+
+.tabs {
+    margin: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+.active {
+    background: #00c6ff;
+    color: black;
+}
+
+.panel {
+    display: none;
+    text-align: center;
+}
+
+input {
+    margin: 5px;
+    padding: 8px;
+    border-radius: 10px;
+    border: none;
+    width: 100px;
+    text-align: center;
+}
+
+canvas {
+    background: #111;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+.stats {
+    margin-top: 15px;
+    font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Martingale Lab</h1>
+
+<div class="tabs">
+    <button id="gamblerTab" class="active">🎰 Gambler</button>
+    <button id="stockTab">📈 Stock Market</button>
+</div>
+
+<!-- Gambler Panel -->
+<div id="gamblerPanel" class="panel" style="display:block;">
+    <div>
+        Start: <input id="start" value="5">
+        Target: <input id="target" value="10">
+        Win Prob (p): <input id="prob" value="0.5">
+        Simulations: <input id="trials" value="1000">
+        <button onclick="runGambler()">Run</button>
+    </div>
+    <canvas id="gamblerCanvas" width="600" height="300"></canvas>
+    <div class="stats" id="gamblerStats"></div>
+</div>
+
+<!-- Stock Panel -->
+<div id="stockPanel" class="panel">
+    <div>
+        Initial Price: <input id="price" value="100">
+        Volatility: <input id="vol" value="2">
+        Steps: <input id="steps" value="100">
+        <button onclick="runStock()">Run</button>
+    </div>
+    <canvas id="stockCanvas" width="600" height="300"></canvas>
+    <div class="stats" id="stockStats"></div>
+</div>
+
+<script>
+// Tab switching
+document.getElementById("gamblerTab").onclick = () => switchTab(true);
+document.getElementById("stockTab").onclick = () => switchTab(false);
+
+function switchTab(isGambler) {
+    document.getElementById("gamblerPanel").style.display = isGambler ? "block" : "none";
+    document.getElementById("stockPanel").style.display = isGambler ? "none" : "block";
+    document.getElementById("gamblerTab").classList.toggle("active", isGambler);
+    document.getElementById("stockTab").classList.toggle("active", !isGambler);
+}
+
+// 🎰 Gambler Simulation
+function runGambler() {
+    let start = parseInt(document.getElementById("start").value);
+    let target = parseInt(document.getElementById("target").value);
+    let p = parseFloat(document.getElementById("prob").value);
+    let trials = parseInt(document.getElementById("trials").value);
+
+    let success = 0;
+    let ctx = document.getElementById("gamblerCanvas").getContext("2d");
+    ctx.clearRect(0, 0, 600, 300);
+
+    for (let t = 0; t < trials; t++) {
+        let wealth = start;
+        while (wealth > 0 && wealth < target) {
+            wealth += Math.random() < p ? 1 : -1;
+        }
+        if (wealth === target) success++;
+    }
+
+    let prob = success / trials;
+    document.getElementById("gamblerStats").innerText =
+        "Estimated P(reach target) = " + prob.toFixed(4);
+
+    // Draw sample path
+    let wealth = start;
+    ctx.beginPath();
+    ctx.moveTo(0, 150);
+    for (let i = 1; i < 200; i++) {
+        wealth += Math.random() < p ? 1 : -1;
+        ctx.lineTo(i * 3, 150 - wealth * 5);
+    }
+    ctx.strokeStyle = "#00c6ff";
+    ctx.stroke();
+}
+
+// 📈 Stock Martingale Simulation
+function runStock() {
+    let price = parseFloat(document.getElementById("price").value);
+    let vol = parseFloat(document.getElementById("vol").value);
+    let steps = parseInt(document.getElementById("steps").value);
+
+    let ctx = document.getElementById("stockCanvas").getContext("2d");
+    ctx.clearRect(0, 0, 600, 300);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 150);
+
+    let sum = 0;
+
+    for (let i = 1; i < steps; i++) {
+        let shock = (Math.random() - 0.5) * vol;
+        price += shock;
+        sum += shock;
+        ctx.lineTo(i * (600/steps), 150 - price);
+    }
+
+    ctx.strokeStyle = "#00ff99";
+    ctx.stroke();
+
+    document.getElementById("stockStats").innerText =
+        "Average shock ≈ " + (sum/steps).toFixed(4) +
+        " (Should be near 0 for martingale)";
+}
+</script>
+
+</body>
+</html>
