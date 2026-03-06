@@ -2,183 +2,287 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Martingale Lab</title>
+<title>Martingale Lab Pro</title>
 <style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+    :root {
+        --sub: #00ff99;   /* Green */
+        --mart: #00c6ff;  /* Blue */
+        --super: #ff4444; /* Red */
+        --bg-dark: #0f172a;
+        --glass: rgba(255, 255, 255, 0.05);
+        --text: #f8fafc;
+    }
 
-h1 {
-    margin-top: 20px;
-    font-size: 32px;
-}
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: radial-gradient(circle at top, #1e293b, var(--bg-dark));
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding-bottom: 50px;
+    }
 
-.tabs {
-    margin: 20px;
-}
+    h1 { 
+        margin-top: 40px; 
+        font-weight: 800; 
+        font-size: 2.2rem;
+        background: linear-gradient(to right, var(--mart), var(--sub)); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+    }
 
-button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-}
+    .tabs { 
+        margin: 20px 0; 
+        background: var(--glass); 
+        padding: 6px; 
+        border-radius: 50px; 
+        border: 1px solid rgba(255,255,255,0.1); 
+        backdrop-filter: blur(10px); 
+    }
+     .legend {
+        display: flex;
+        gap: 20px;
+        margin: 10px 0;
+        font-weight: bold;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+ .legend span:nth-child(1) { color: var(--sub); }
+    .legend span:nth-child(2) { color: var(--mart); }
+    .legend span:nth-child(3) { color: var(--super); }
+    button { 
+        padding: 12px 24px; 
+        margin: 0 4px; 
+        border: none; 
+        border-radius: 40px; 
+        cursor: pointer; 
+        font-weight: 700; 
+        background: transparent; 
+        color: #94a3b8; 
+        transition: 0.3s; 
+    }
 
-button:hover {
-    transform: scale(1.05);
-}
+    button.active { background: white; color: #0f172a; box-shadow: 0 4px 15px rgba(0, 198, 255, 0.4); }
 
-.active {
-    background: #00c6ff;
-    color: black;
-}
+    .panel { 
+        display: none; 
+        background: var(--glass); 
+        padding: 30px; 
+        border-radius: 24px; 
+        border: 1px solid rgba(255,255,255,0.1); 
+        backdrop-filter: blur(12px); 
+        width: 90%; 
+        max-width: 850px; 
+    }
 
-.panel {
-    display: none;
-    text-align: center;
-}
+    .controls-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+        gap: 15px; 
+        margin-bottom: 25px; 
+    }
 
-input {
-    margin: 5px;
-    padding: 8px;
-    border-radius: 10px;
-    border: none;
-    width: 100px;
-    text-align: center;
-}
+    .input-wrapper { display: flex; flex-direction: column; text-align: left; }
+    label { font-size: 0.7rem; font-weight: 600; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase; }
+    input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; outline: none; }
 
-canvas {
-    background: #111;
-    border-radius: 15px;
-    margin-top: 20px;
-}
+    .run-action { 
+        background: linear-gradient(135deg, #f8fafc, #cbd5e1); 
+        color: #0f172a; 
+        width: 100%; 
+        grid-column: 1 / -1; 
+        font-weight: 800; 
+        margin-top: 10px; 
+        padding: 14px; 
+        border-radius: 12px; 
+        border: none;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
 
-.stats {
-    margin-top: 15px;
-    font-size: 18px;
-}
+    canvas { background: #000; border-radius: 12px; width: 100%; height: auto; border: 1px solid rgba(255,255,255,0.05); }
+
+    .stats-box { 
+        margin-top: 20px; 
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .stat-card { 
+        flex: 1;
+        min-width: 200px;
+        padding: 15px; 
+        background: rgba(0,0,0,0.3); 
+        border-radius: 12px; 
+        font-family: 'Courier New', monospace; 
+        font-size: 0.85rem;
+        border-left: 4px solid var(--mart);
+    }
 </style>
 </head>
-
 <body>
 
-<h1>Martingale Lab</h1>
+<h1>Martingale Analysis Lab</h1>
 
 <div class="tabs">
-    <button id="gamblerTab" class="active">🎰 Gambler</button>
-    <button id="stockTab">📈 Stock Market</button>
+    <button id="gamblerTab" class="active">🎰 Gambler Theory</button>
+    <button id="stockTab">📈 Market Drift</button>
 </div>
 
-<!-- Gambler Panel -->
 <div id="gamblerPanel" class="panel" style="display:block;">
-    <div>
-        Start: <input id="start" value="5">
-        Target: <input id="target" value="10">
-        Win Prob (p): <input id="prob" value="0.5">
-        Simulations: <input id="trials" value="1000">
-        <button onclick="runGambler()">Run</button>
+    <div class="controls-grid">
+        <div class="input-wrapper"><label>Start Wealth</label><input id="gStart" value="5"></div>
+        <div class="input-wrapper"><label>Target Wealth</label><input id="gTarget" value="10"></div>
+        <div class="input-wrapper"><label>Win Prob (p)</label><input id="gProb" value="0.5"></div>
+        <div class="input-wrapper"><label>Trials</label><input id="gTrials" value="1000"></div>
+        <button class="run-action" onclick="runGambler()">Run Standard Path</button>
     </div>
-    <canvas id="gamblerCanvas" width="600" height="300"></canvas>
-    <div class="stats" id="gamblerStats"></div>
+    <canvas id="gamblerCanvas" width="800" height="350"></canvas>
+    <div class="stats-box" id="gStats"></div>
 </div>
 
-<!-- Stock Panel -->
 <div id="stockPanel" class="panel">
-    <div>
-        Initial Price: <input id="price" value="100">
-        Volatility: <input id="vol" value="2">
-        Steps: <input id="steps" value="100">
-        <button onclick="runStock()">Run</button>
+    <div class="legend">
+    <span>▲ Sub-Martingale (+Drift)</span>
+    <span>● Martingale (Fair)</span>
+    <span>▼ Super-Martingale (-Drift)</span>
+</div>
+    <div class="controls-grid">
+        <div class="input-wrapper"><label>Price</label><input id="sPrice" value="100"></div>
+        <div class="input-wrapper"><label>Vol</label><input id="sVol" value="25"></div>
+        <div class="input-wrapper"><label>Steps</label><input id="sSteps" value="200"></div>
+        <div class="input-wrapper"><label>Drift (μ)</label><input id="sDrift" value="0.15"></div>
+        <button class="run-action" onclick="runStock()">Simulate Drift Types</button>
     </div>
-    <canvas id="stockCanvas" width="600" height="300"></canvas>
-    <div class="stats" id="stockStats"></div>
+    <canvas id="stockCanvas" width="800" height="350"></canvas>
+    <div class="stats-box" id="sStats"></div>
 </div>
 
 <script>
-// Tab switching
+const padding = { left: 60, bottom: 50, top: 30, right: 30 };
+
+// Tab Navigation
 document.getElementById("gamblerTab").onclick = () => switchTab(true);
 document.getElementById("stockTab").onclick = () => switchTab(false);
-
-function switchTab(isGambler) {
-    document.getElementById("gamblerPanel").style.display = isGambler ? "block" : "none";
-    document.getElementById("stockPanel").style.display = isGambler ? "none" : "block";
-    document.getElementById("gamblerTab").classList.toggle("active", isGambler);
-    document.getElementById("stockTab").classList.toggle("active", !isGambler);
+function switchTab(isG) {
+    document.getElementById("gamblerPanel").style.display = isG ? "block" : "none";
+    document.getElementById("stockPanel").style.display = isG ? "none" : "block";
+    document.getElementById("gamblerTab").classList.toggle("active", isG);
+    document.getElementById("stockTab").classList.toggle("active", !isG);
 }
 
-// 🎰 Gambler Simulation
+function drawGrid(ctx, xMax, yMax, yMin, xLabel, yLabel) {
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "10px sans-serif";
+    
+    for(let i=0; i<=5; i++) {
+        let val = yMin + (yMax - yMin) * (i/5);
+        let y = (350 - padding.bottom) - (i/5 * (350 - padding.bottom - padding.top));
+        ctx.fillText(val.toFixed(1), 10, y + 3);
+        ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(800 - padding.right, y); ctx.stroke();
+    }
+    
+    for(let i=0; i<=5; i++) {
+        let val = (xMax * (i/5));
+        let x = padding.left + (i/5 * (800 - padding.left - padding.right));
+        ctx.fillText(val.toFixed(0), x - 5, 350 - 20);
+        ctx.beginPath(); ctx.moveTo(x, padding.top); ctx.lineTo(x, 350 - padding.bottom); ctx.stroke();
+    }
+    ctx.fillStyle = "white";
+    ctx.fillText(yLabel, padding.left, padding.top - 10);
+    ctx.fillText(xLabel, 750, 350 - 10);
+}
+
+// Gambler: Original Single Path Martingale
 function runGambler() {
-    let start = parseInt(document.getElementById("start").value);
-    let target = parseInt(document.getElementById("target").value);
-    let p = parseFloat(document.getElementById("prob").value);
-    let trials = parseInt(document.getElementById("trials").value);
+    let start = parseInt(document.getElementById("gStart").value);
+    let target = parseInt(document.getElementById("gTarget").value);
+    let p = parseFloat(document.getElementById("gProb").value);
+    let trials = parseInt(document.getElementById("gTrials").value);
+    let ctx = document.getElementById("gamblerCanvas").getContext("2d");
+    
+    ctx.clearRect(0, 0, 800, 350);
+    drawGrid(ctx, 200, target, 0, "n", "Wealth");
 
     let success = 0;
-    let ctx = document.getElementById("gamblerCanvas").getContext("2d");
-    ctx.clearRect(0, 0, 600, 300);
-
     for (let t = 0; t < trials; t++) {
-        let wealth = start;
-        while (wealth > 0 && wealth < target) {
-            wealth += Math.random() < p ? 1 : -1;
-        }
-        if (wealth === target) success++;
+        let w = start;
+        while (w > 0 && w < target) { w += Math.random() < p ? 1 : -1; }
+        if (w >= target) success++;
     }
 
-    let prob = success / trials;
-    document.getElementById("gamblerStats").innerText =
-        "Estimated P(reach target) = " + prob.toFixed(4);
-
-    // Draw sample path
-    let wealth = start;
-    ctx.beginPath();
-    ctx.moveTo(0, 150);
-    for (let i = 1; i < 200; i++) {
-        wealth += Math.random() < p ? 1 : -1;
-        ctx.lineTo(i * 3, 150 - wealth * 5);
+    let w = start;
+    ctx.beginPath(); ctx.strokeStyle = "#00c6ff"; ctx.lineWidth = 3;
+    ctx.moveTo(padding.left, (350 - padding.bottom) - (start/target * (350 - padding.bottom - padding.top)));
+    for (let i = 1; i <= 200; i++) {
+        w += Math.random() < p ? 1 : -1;
+        let x = padding.left + (i * (800 - padding.left - padding.right) / 200);
+        let y = (350 - padding.bottom) - (w/target * (350 - padding.bottom - padding.top));
+        ctx.lineTo(x, y);
+        if (w <= 0 || w >= target) break;
     }
-    ctx.strokeStyle = "#00c6ff";
     ctx.stroke();
+
+    document.getElementById("gStats").innerHTML = `
+        <div class="stat-card">
+            <strong>Outcome Summary</strong><br>
+            Empirical P(Success): ${(success/trials).toFixed(4)}<br>
+            Theoretical P: ${(start/target).toFixed(4)} (for p=0.5)
+        </div>`;
 }
 
-// 📈 Stock Martingale Simulation
+// Stock: 3-Way Drift Comparison
 function runStock() {
-    let price = parseFloat(document.getElementById("price").value);
-    let vol = parseFloat(document.getElementById("vol").value);
-    let steps = parseInt(document.getElementById("steps").value);
-
+    let p_init = parseFloat(document.getElementById("sPrice").value);
+    let vol = parseFloat(document.getElementById("sVol").value);
+    let steps = parseInt(document.getElementById("sSteps").value);
+    let driftVal = parseFloat(document.getElementById("sDrift").value);
     let ctx = document.getElementById("stockCanvas").getContext("2d");
-    ctx.clearRect(0, 0, 600, 300);
+    
+    ctx.clearRect(0, 0, 800, 350);
+    drawGrid(ctx, steps, p_init + vol, p_init - vol, "t", "Price ($)");
 
-    ctx.beginPath();
-    ctx.moveTo(0, 150);
+    const configs = [
+        { d: driftVal, name: "Submartingale (+μ)", col: "#00ff99" },
+        { d: 0, name: "Martingale (Fair)", col: "#00c6ff" },
+        { d: -driftVal, name: "Supermartingale (-μ)", col: "#ff4444" }
+    ];
 
-    let sum = 0;
+    let statsHTML = "";
+    configs.forEach(cfg => {
+        let price = p_init;
+        ctx.beginPath(); ctx.strokeStyle = cfg.col; ctx.lineWidth = 2.5;
+        
+        const getX = (i) => padding.left + (i * (800 - padding.left - padding.right) / steps);
+        const getY = (val) => {
+            let range = vol * 2;
+            let offset = val - (p_init - vol);
+            return (350 - padding.bottom) - (offset/range * (350 - padding.bottom - padding.top));
+        };
 
-    for (let i = 1; i < steps; i++) {
-        let shock = (Math.random() - 0.5) * vol;
-        price += shock;
-        sum += shock;
-        ctx.lineTo(i * (600/steps), 150 - price);
-    }
+        ctx.moveTo(getX(0), getY(p_init));
+        for (let i = 1; i <= steps; i++) {
+            let shock = (Math.random() - 0.5) * (vol/8) + cfg.d;
+            price += shock;
+            ctx.lineTo(getX(i), getY(price));
+        }
+        ctx.stroke();
 
-    ctx.strokeStyle = "#00ff99";
-    ctx.stroke();
-
-    document.getElementById("stockStats").innerText =
-        "Average shock ≈ " + (sum/steps).toFixed(4) +
-        " (Should be near 0 for martingale)";
+        statsHTML += `
+            <div class="stat-card" style="border-left-color:${cfg.col}">
+                <strong>${cfg.name}</strong><br>
+                Drift Term: ${cfg.d.toFixed(2)}<br>
+                E[Xₜ] = X₀ + μt
+            </div>`;
+    });
+    document.getElementById("sStats").innerHTML = statsHTML;
 }
 </script>
-
 </body>
 </html>
