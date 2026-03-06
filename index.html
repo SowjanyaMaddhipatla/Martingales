@@ -51,7 +51,7 @@
         text-transform: uppercase;
         letter-spacing: 1px;
     }
- .legend span:nth-child(1) { color: var(--sub); }
+    .legend span:nth-child(1) { color: var(--sub); }
     .legend span:nth-child(2) { color: var(--mart); }
     .legend span:nth-child(3) { color: var(--super); }
     button { 
@@ -274,11 +274,15 @@ function runStock() {
         }
         ctx.stroke();
 
+        // Calculate theoretical expectation: E[X_T] = X_0 + (drift * steps)
+        let theoreticalExpectation = p_init + (cfg.d * steps);
+
         statsHTML += `
             <div class="stat-card" style="border-left-color:${cfg.col}">
                 <strong>${cfg.name}</strong><br>
-                Drift Term: ${cfg.d.toFixed(2)}<br>
-                E[Xₜ] = X₀ + μt
+                Drift Term (μ): ${cfg.d.toFixed(2)}<br>
+                Theoretical E[X_T]: ${theoreticalExpectation.toFixed(2)}<br>
+                Final Price: ${price.toFixed(2)}
             </div>`;
     });
     document.getElementById("sStats").innerHTML = statsHTML;
