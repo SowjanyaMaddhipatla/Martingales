@@ -316,6 +316,53 @@ function runGambler() {
 }
 
 // Stock: 3-Way Drift Comparison
+// function runStock() {
+//     let p_init = parseFloat(document.getElementById("sPrice").value);
+//     let vol = parseFloat(document.getElementById("sVol").value);
+//     let steps = parseInt(document.getElementById("sSteps").value);
+//     let driftVal = parseFloat(document.getElementById("sDrift").value);
+//     let ctx = document.getElementById("stockCanvas").getContext("2d");
+    
+//     ctx.clearRect(0, 0, 800, 350);
+//     drawGrid(ctx, steps, p_init + vol, p_init - vol, "t", "Price ($)");
+
+//     const configs = [
+//         { d: driftVal, name: "Submartingale (+μ)", col: "#00ff99" },
+//         { d: 0, name: "Martingale (Fair)", col: "#00c6ff" },
+//         { d: -driftVal, name: "Supermartingale (-μ)", col: "#ff4444" }
+//     ];
+
+//     let statsHTML = "";
+//     configs.forEach(cfg => {
+//         let price = p_init;
+//         ctx.beginPath(); ctx.strokeStyle = cfg.col; ctx.lineWidth = 2.5;
+        
+//         const getX = (i) => padding.left + (i * (800 - padding.left - padding.right) / steps);
+//         const getY = (val) => {
+//             let range = vol * 2;
+//             let offset = val - (p_init - vol);
+//             return (350 - padding.bottom) - (offset/range * (350 - padding.bottom - padding.top));
+//         };
+
+//         ctx.moveTo(getX(0), getY(p_init));
+//         for (let i = 1; i <= steps; i++) {
+//             let shock = (Math.random() - 0.5) * (vol/8) + cfg.d;
+//             price += shock;
+//             ctx.lineTo(getX(i), getY(price));
+//         }
+//         ctx.stroke();
+
+//         statsHTML += `
+//             <div class="stat-card" style="border-left-color:${cfg.col}">
+//                 <strong>${cfg.name}</strong><br>
+//                 Drift Term: ${cfg.d.toFixed(2)}<br>
+//                 E[Xₜ] = X₀ + μt
+//             </div>`;
+//     });
+//     document.getElementById("sStats").innerHTML = statsHTML;
+// }
+
+// Stock: 3-Way Drift Comparison
 function runStock() {
     let p_init = parseFloat(document.getElementById("sPrice").value);
     let vol = parseFloat(document.getElementById("sVol").value);
@@ -334,8 +381,10 @@ function runStock() {
 
     let statsHTML = "";
     configs.forEach(cfg => {
-        let price = p_init;
-        ctx.beginPath(); ctx.strokeStyle = cfg.col; ctx.lineWidth = 2.5;
+        let currentPrice = p_init; // Track current price through the loop
+        ctx.beginPath(); 
+        ctx.strokeStyle = cfg.col; 
+        ctx.lineWidth = 2.5;
         
         const getX = (i) => padding.left + (i * (800 - padding.left - padding.right) / steps);
         const getY = (val) => {
@@ -346,17 +395,19 @@ function runStock() {
 
         ctx.moveTo(getX(0), getY(p_init));
         for (let i = 1; i <= steps; i++) {
+            // Logic: P_t = P_t-1 + (Shock) + Drift
             let shock = (Math.random() - 0.5) * (vol/8) + cfg.d;
-            price += shock;
-            ctx.lineTo(getX(i), getY(price));
+            currentPrice += shock;
+            ctx.lineTo(getX(i), getY(currentPrice));
         }
         ctx.stroke();
 
+        // Update the stat card to show the Actual Final Value reached
         statsHTML += `
             <div class="stat-card" style="border-left-color:${cfg.col}">
                 <strong>${cfg.name}</strong><br>
                 Drift Term: ${cfg.d.toFixed(2)}<br>
-                E[Xₜ] = X₀ + μt
+                Final Value: <span style="color:white; font-weight:bold;">${currentPrice.toFixed(2)}</span>
             </div>`;
     });
     document.getElementById("sStats").innerHTML = statsHTML;
